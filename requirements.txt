@@ -1,0 +1,2 @@
+# Runtime dependencies: stdlib only (json, dataclasses, argparse).
+# Keeping the scaffold dependency-free makes it easy to review and run.

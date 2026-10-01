@@ -1,0 +1,54 @@
+{
+  "alert": {
+    "id": "ALT-20261001-001",
+    "service": "payments-api",
+    "type": "high_p99_latency",
+    "severity": "critical",
+    "fired_at": "2026-10-01T14:32:00Z",
+    "description": "p99 latency above 2000ms for 5 consecutive minutes (SLO: 500ms)"
+  },
+  "steps_taken": 3,
+  "hypotheses": [
+    {
+      "title": "Bad deploy regression (v2.14.3)",
+      "confidence": 0.8,
+      "evidence": [
+        "Deploy completed at 2026-10-01T14:07:12Z, ~25m before the alert.",
+        "Timeout/pool-exhaustion errors appeared only after the deploy.",
+        "p99 latency 182ms -> 2412ms (+1225%).",
+        "CPU stayed flat \u2014 not a resource-saturation issue."
+      ],
+      "remediation": [
+        "Roll back payments-api to v2.14.2 immediately.",
+        "Roll back to the previous stable version.",
+        "Confirm p99 recovers within 10 minutes of rollback.",
+        "Diff v2.14.2..v2.14.3 focusing on DB query/connection changes."
+      ]
+    },
+    {
+      "title": "Downstream dependency slowdown",
+      "confidence": 0.45,
+      "evidence": [
+        "Timeout errors mention upstream calls.",
+        "Latency spike pattern also matches a slow dependency."
+      ],
+      "remediation": [
+        "Check trace spans for the slowest downstream call.",
+        "Enable circuit breaker / shed load on the slow path."
+      ]
+    },
+    {
+      "title": "Traffic surge",
+      "confidence": 0.3,
+      "evidence": [
+        "CPU flat and no request-rate data in this demo \u2014 cannot confirm a surge."
+      ],
+      "remediation": [
+        "Compare request rate vs baseline.",
+        "Scale out horizontally if a surge is confirmed."
+      ]
+    }
+  ],
+  "top_recommendation": "Roll back payments-api to v2.14.2 immediately.",
+  "data_provenance": "SIMULATED - demo data, not production telemetry"
+}

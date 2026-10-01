@@ -1,0 +1,209 @@
+{
+  "_provenance": "SIMULATED - demo data for Ops-Agent. Not production telemetry.",
+  "alert": {
+    "alert_type": "high_p99_latency",
+    "description": "p99 latency above 2000ms for 5 consecutive minutes (SLO: 500ms)",
+    "fired_at": "2026-10-01T14:32:00Z",
+    "id": "ALT-20261001-001",
+    "service": "payments-api",
+    "severity": "critical"
+  },
+  "logs": [
+    {
+      "level": "INFO",
+      "message": "health check ok, p99=182ms",
+      "service": "payments-api",
+      "ts": "2026-10-01T13:30:00Z"
+    },
+    {
+      "level": "INFO",
+      "message": "starting deploy v2.14.3 (build #4821)",
+      "service": "payments-api",
+      "ts": "2026-10-01T14:05:00Z"
+    },
+    {
+      "level": "INFO",
+      "message": "deploy v2.14.3 completed, 12/12 pods ready",
+      "service": "payments-api",
+      "ts": "2026-10-01T14:07:12Z"
+    },
+    {
+      "level": "WARN",
+      "message": "upstream timeout after 3000ms: POST /charge (attempt 1/3)",
+      "service": "payments-api",
+      "ts": "2026-10-01T14:09:44Z"
+    },
+    {
+      "level": "ERROR",
+      "message": "request timeout: GET /balance, trace_id=9f2c",
+      "service": "payments-api",
+      "ts": "2026-10-01T14:12:03Z"
+    },
+    {
+      "level": "ERROR",
+      "message": "connection pool exhausted: waiting for db connection (pool=50, waiting=38)",
+      "service": "payments-api",
+      "ts": "2026-10-01T14:18:37Z"
+    },
+    {
+      "level": "ERROR",
+      "message": "request timeout: POST /charge, trace_id=41ad",
+      "service": "payments-api",
+      "ts": "2026-10-01T14:25:11Z"
+    },
+    {
+      "level": "CRITICAL",
+      "message": "SLO burn alert: p99=2412ms > 500ms for 5m",
+      "service": "payments-api",
+      "ts": "2026-10-01T14:31:59Z"
+    }
+  ],
+  "metrics": {
+    "cpu_pct": [
+      [
+        "2026-10-01T13:32:00Z",
+        34
+      ],
+      [
+        "2026-10-01T13:52:00Z",
+        36
+      ],
+      [
+        "2026-10-01T14:02:00Z",
+        35
+      ],
+      [
+        "2026-10-01T14:12:00Z",
+        37
+      ],
+      [
+        "2026-10-01T14:22:00Z",
+        36
+      ],
+      [
+        "2026-10-01T14:32:00Z",
+        38
+      ]
+    ],
+    "db_pool_used_pct": [
+      [
+        "2026-10-01T13:32:00Z",
+        42
+      ],
+      [
+        "2026-10-01T13:52:00Z",
+        44
+      ],
+      [
+        "2026-10-01T14:02:00Z",
+        41
+      ],
+      [
+        "2026-10-01T14:12:00Z",
+        68
+      ],
+      [
+        "2026-10-01T14:22:00Z",
+        79
+      ],
+      [
+        "2026-10-01T14:32:00Z",
+        86
+      ]
+    ],
+    "error_rate_pct": [
+      [
+        "2026-10-01T13:32:00Z",
+        0.1
+      ],
+      [
+        "2026-10-01T13:52:00Z",
+        0.1
+      ],
+      [
+        "2026-10-01T14:02:00Z",
+        0.2
+      ],
+      [
+        "2026-10-01T14:12:00Z",
+        1.8
+      ],
+      [
+        "2026-10-01T14:22:00Z",
+        3.9
+      ],
+      [
+        "2026-10-01T14:32:00Z",
+        4.5
+      ]
+    ],
+    "p99_latency_ms": [
+      [
+        "2026-10-01T13:32:00Z",
+        182
+      ],
+      [
+        "2026-10-01T13:52:00Z",
+        191
+      ],
+      [
+        "2026-10-01T14:02:00Z",
+        178
+      ],
+      [
+        "2026-10-01T14:12:00Z",
+        1240
+      ],
+      [
+        "2026-10-01T14:22:00Z",
+        2380
+      ],
+      [
+        "2026-10-01T14:32:00Z",
+        2412
+      ]
+    ]
+  },
+  "runbooks": {
+    "deployment-regression": {
+      "steps": [
+        "Identify the suspect deploy (version, time, author).",
+        "Roll back to the previous stable version.",
+        "Confirm p99 recovers within 10 minutes of rollback.",
+        "Diff the change: focus on DB query changes, new N+1 patterns, connection handling.",
+        "File a postmortem; add a canary gate before full rollout."
+      ],
+      "title": "Deployment regression",
+      "triggers": [
+        "latency spike within 60m of a deploy",
+        "error rate rise after deploy"
+      ]
+    },
+    "downstream-dependency": {
+      "steps": [
+        "Identify the slow dependency from trace spans.",
+        "Check the dependency's status page and dashboards.",
+        "Enable circuit breaker / shed load if available.",
+        "Fail over to the secondary region if the dependency is regional."
+      ],
+      "title": "Downstream dependency slowdown",
+      "triggers": [
+        "latency spike with no recent deploy",
+        "timeouts on specific downstream calls"
+      ]
+    },
+    "traffic-surge": {
+      "steps": [
+        "Confirm request rate vs baseline.",
+        "Scale out the deployment horizontally.",
+        "Enable rate limiting on non-critical endpoints.",
+        "Check for a DDoS pattern and engage the WAF rules."
+      ],
+      "title": "Traffic surge",
+      "triggers": [
+        "latency spike correlated with request rate increase",
+        "CPU saturation"
+      ]
+    }
+  }
+}
