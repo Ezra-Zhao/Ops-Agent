@@ -15,6 +15,8 @@ steps, and writes up the incident report.
 
 ---
 
+
+Support & more: [GitHub Sponsors](https://github.com/sponsors/Ezra-Zhao) · [Gumroad — templates & workbooks I use](https://ezraflow28.gumroad.com) · [Ko-fi](https://ko-fi.com/ezra777zhao)
 ## Problem
 
 When an alert fires at 2 AM, the on-call engineer repeats the same drill:
